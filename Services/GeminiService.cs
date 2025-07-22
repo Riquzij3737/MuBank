@@ -25,9 +25,7 @@ namespace Mubank.Services
                 {
                     sb.Append(part.Text);
                 }
-
                 
-
                 return sb.ToString();
             }
         }

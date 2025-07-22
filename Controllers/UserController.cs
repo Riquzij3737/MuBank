@@ -122,7 +122,7 @@ namespace Mubank.Controllers
                 {
                     Message = "Não tem oq atualizar, bruh",
                     DataDeHoje = DateTime.Now,
-                    MensagemDoDiaDoPastor = new GeminiService().SendHttpPost("Gere uma frase biblica para alegrar o dia de uma pessoa de no maximo 30 linhas")
+                    MensagemDoDiaDoPastor = new GeminiService().SendHttpPost("Gere uma frase biblica para alegrar o dia de uma pessoa tudo em uma linha só sem conter a fonte dela,sem conter aspas, apenas a frase").GetAwaiter().GetResult()
                 });
             } else
             {
