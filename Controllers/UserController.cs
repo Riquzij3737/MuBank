@@ -146,5 +146,26 @@ namespace Mubank.Controllers
                 return Ok(UserDto);
             }
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteUser(Guid idForSearch)
+        {
+            Client_Connected("Usuario conectado para deletar algum usuario do banco de dados da api");
+            if (idForSearch == null)
+            {
+                return BadRequest(Error_Throwed("Id nulo, impossivel deletar usuario sem o ID para authenticação"));
+            }
+            else
+            {
+                var user = await _context.Users.Where(x => x.Id == idForSearch).FirstOrDefaultAsync();
+                if (user == null)
+                {
+                    return NotFound(Error_Throwed("Usuario não encontrado"));
+                }
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+                return Ok(new { Message = "Usuario deletado com sucesso" });
+            }
+        }
     }
 }
