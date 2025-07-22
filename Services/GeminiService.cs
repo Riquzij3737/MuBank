@@ -4,7 +4,6 @@ using System.Text;
 using GeminiSharp.Client;
 using GeminiSharp.Models.Response;
 
-
 namespace Mubank.Services
 {
     public class GeminiService
@@ -16,9 +15,20 @@ namespace Mubank.Services
                 var apikey = "AIzaSyCWbTec8TIwOEFdWkq5FyNsLvRGM2PO58Y";
                 var GeminiClient = new GeminiClient(client, apikey);
 
-                var reponse = await GeminiClient.GenerateContentAsync("gemini-2.0", message);
+                var reponse = await GeminiClient.GenerateContentAsync("gemini-2.0-flash", message);
 
-                reponse.
+                var responseContent = reponse.Candidates[0].Content.Parts;
+                string responsestring = null;
+                var sb = new StringBuilder(responsestring);
+
+                foreach (var part in responseContent)
+                {
+                    sb.Append(part.Text);
+                }
+
+                
+
+                return sb.ToString();
             }
         }
     }

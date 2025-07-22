@@ -12,6 +12,10 @@ namespace Mubank
     {
         public static void Main(string[] args)
         {
+            var @string = new GeminiService().SendHttpPost("Gere uma frase biblica para melhorar o dia de no maximo 50 caracteres").GetAwaiter().GetResult();
+
+            Console.WriteLine(@string);
+
             var builder = WebApplication.CreateBuilder(args);            
 
             // Add services to the container.            
