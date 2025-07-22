@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Mubank.Middlawares
 {
-    // You may need to install the Microsoft.AspNetCore.Http.Abstractions package into your project
+    
     public class BlockMongoliaPeopleMiddleware
     {
         private readonly RequestDelegate _next;
@@ -27,24 +27,61 @@ namespace Mubank.Middlawares
             ? context.Request.Headers["X-Forwarded-For"].ToString().Split(',')[0]
             : context.Connection.RemoteIpAddress?.ToString();
 
-            var GeoModel = GetLocalizedModel(ip).Result;
+            var GeoModel = await GetLocalizedModel(ip);
+            var Modelblocked = _dataContext.IPsBlocked.FirstOrDefault(x => x.Ip == ip);
 
-            if (GeoModel.Country != "Mongolia")
+            try
             {
-                context.Response.StatusCode = 403;
-
-                context.Response.WriteAsync("Seu IP está bloqueado.\n motivo: Seu país é o mesmo do genshis kam, mongol!");
-
-                await _dataContext.IPsBlocked.AddAsync(new IPsBlockedModel()
+                if (GeoModel == null)
                 {
-                    Id = Guid.NewGuid(),
-                    Ip = ip,
-                    Reason = "Pq o pais do cara é a mongolia mano, pais do genshis kam",
-                    DateBlocked = DateTime.Now
-                });
+                                       context.Response.StatusCode = 400;
+                    await context.Response.WriteAsync("Could not retrieve geolocation data.");
+                    return;
+                } else
+                {
+                    if (GeoModel.Country == "Mongolia")
+                    {
+                        context.Response.StatusCode = 403;
 
+                        await context.Response.WriteAsync("Seu IP está bloqueado.\n motivo: Seu país é o mesmo do genshis kam, mongol!");
+
+                        await _dataContext.IPsBlocked.AddAsync(new IPsBlockedModel()
+                        {
+                            Id = Guid.NewGuid(),
+                            Ip = ip,
+                            Reason = "Pq o pais do cara é a mongolia mano, pais do genshis kam",
+                            DateBlocked = DateTime.Now
+                        });
+
+                        await _dataContext.SaveChangesAsync();
+
+
+                        return;
+                    }
+                    else if (Modelblocked != null)
+                    {
+                        context.Response.StatusCode = 403;
+
+                        await context.Response.WriteAsync("Seu IP está bloqueado.\n motivo: Seu país é o mesmo do genshis kam, mongol!");
+
+                        return;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                var error = new ErrorModel()
+                {
+                    IdError = Guid.NewGuid(),
+                    MessageError = ex.Message,
+                    HttpStatusCode = 500,
+                    Date = DateTime.Now
+                };
+
+                await _dataContext.Errors.AddAsync(error);
                 await _dataContext.SaveChangesAsync();
-
+                await context.Response.WriteAsJsonAsync(error);
 
                 return;
             }
