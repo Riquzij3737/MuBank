@@ -35,10 +35,21 @@ namespace Mubank.Middlawares
 
                 context.Response.WriteAsync("Seu IP está bloqueado.\n motivo: Seu país é o mesmo do genshis kam, mongol!");
 
+                await _dataContext.IPsBlocked.AddAsync(new IPsBlockedModel()
+                {
+                    Id = Guid.NewGuid(),
+                    Ip = ip,
+                    Reason = "Pq o pais do cara é a mongolia mano, pais do genshis kam",
+                    DateBlocked = DateTime.Now
+                });
+
+                await _dataContext.SaveChangesAsync();
+
+
                 return;
             }
 
-            return _next(httpContext);
+            await _next(context);
         }
 
         public async Task<DataIPLocalizedModel> GetLocalizedModel(string ipadress)

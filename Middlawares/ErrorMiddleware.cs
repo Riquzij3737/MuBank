@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Mubank.Models;
+using Mubank.Services;
 using System.Threading.Tasks;
 
 namespace Mubank.Middlawares
@@ -8,16 +11,36 @@ namespace Mubank.Middlawares
     public class ErrorMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly IMapper _mapper;
+        private readonly DataContext _context;
 
-        public ErrorMiddleware(RequestDelegate next)
+        public ErrorMiddleware(RequestDelegate next, DataContext context, IMapper mapper)
         {
             _next = next;
+            _context = context;
+            _mapper = mapper;
         }
 
         public Task Invoke(HttpContext httpContext)
         {
 
-            return _next(httpContext);
+            try
+            {
+                return _next(httpContext);
+            }
+            catch (Exception ex)
+            {
+                var error = new ErrorModel()
+                {
+                    IdError = Guid.NewGuid(),
+                    MessageError = ex.Message,
+                    HttpStatusCode = 500,
+                    Date = DateTime.Now
+                };
+
+                var dto = new
+                throw;
+            }
         }
     }
 

@@ -14,6 +14,7 @@ namespace Mubank.Services
         public DbSet<TransationsModel> Transations { get; set; }
         public DbSet<ErrorModel> Errors { get; set; }
         public DbSet<HostConnectLogModel> HostConnectLog { get; set; }
+        public DbSet<IPsBlockedModel> IPsBlocked { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
