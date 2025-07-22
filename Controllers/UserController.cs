@@ -67,9 +67,30 @@ namespace Mubank.Controllers
             Client_Connected("Cliente conectado na rota /api/user para usar o seu metodo GET para receber os usuarios presentes no banco de dados");
 
             if (id == null)
-                return Ok(_context.Users.ToList());
+            {
+                List<UserDTO> dtos = new List<UserDTO>();
+
+                foreach (var user in _context.Users.ToList())
+                {
+                    var userdto = _mapper.Map<UserModel, UserDTO>(user);
+
+                    userdto.password = string.Empty;
+
+                    for (int i = 0; i < user.Password.Length; i++)
+                    {
+                        userdto.password += "*";
+                    }
+
+                    dtos.Add(userdto);
+                }
+
+                return Ok(dtos);
+            }
             else
-                return Ok(_context.Users.Where(x => x.Id == id).FirstOrDefault());
+            {
+
+            }
+             
         }
 
         [HttpPost]
