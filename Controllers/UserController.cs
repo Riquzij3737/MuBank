@@ -62,14 +62,14 @@ namespace Mubank.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUserAsync(Guid? id)
+        public IActionResult GetUserAsync(Guid? id)
         {
             Client_Connected("Cliente conectado na rota /api/user para usar o seu metodo GET para receber os usuarios presentes no banco de dados");
 
             if (id == null)
-                return Ok(await _context.Users.ToListAsync());
+                return Ok(_context.Users.ToList());
             else
-                return Ok(await _context.Users.Where(x => x.Id == id).FirstOrDefaultAsync());
+                return Ok(_context.Users.Where(x => x.Id == id).FirstOrDefault());
         }
 
         [HttpPost]
