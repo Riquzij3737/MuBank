@@ -113,9 +113,37 @@ namespace Mubank.Controllers
         {
             Client_Connected("Usuario conectado para atualizar algum dado de usuarios do banco de dados da api");
 
-            if (userupdate == null)
+            if (idForSearch == null)
             {
-
+                return BadRequest(Error_Throwed("Id nulo, impossivel atualizar usuario sem o ID para authenticação"));                
+            } else if (userupdate == null) 
+            {
+                return Conflict(new
+                {
+                    Message = "Não tem oq atualizar, bruh",
+                    DataDeHoje = DateTime.Now,
+                    MensagemDoDiaDoPastor = new GeminiService().SendHttpPost("Gere uma frase biblica para alegrar o dia de uma pessoa de no maximo 30 linhas")
+                });
+            } else
+            {
+                var user = await _context.Users.Where(x => x.Id == idForSearch).FirstOrDefaultAsync();
+                if (user == null)
+                {
+                    return NotFound(Error_Throwed("Usuario não encontrado"));
+                }
+                user.Name = userupdate.Name;
+                user.Email = userupdate.Email;
+                user.Password = BCrypt.Net.BCrypt.HashPassword(userupdate.Password);
+                user.RoleName = "NormalUser";
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+                var UserDto = _mapper.Map<UserModel, UserDTO>(user);
+                UserDto.password = string.Empty;
+                for (int i = 0; i < userupdate.Password.Length; i++)
+                {
+                    UserDto.password += "*";
+                }
+                return Ok(UserDto);
             }
         }
     }
