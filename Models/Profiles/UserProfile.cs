@@ -9,6 +9,7 @@ namespace Mubank.Models
         {            
             CreateMap<UserCreateDTO, UserModel>();
             CreateMap<UserModel, UserResponseDTO>();
+            CreateMap<UserModel, UserDTO>();
         }
     }
 }

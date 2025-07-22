@@ -18,16 +18,18 @@ namespace Mubank.Controllers
         private readonly IMapper _mapper;   
         private readonly ITokenService _tokenService;
         private readonly ILogger<UserController> _logger;        
+        private readonly IConfiguration _config;
 
-        public UserController(DataContext context, IMapper mapper, ITokenService tokenService, ILogger<UserController> logger)
-        {            
+        public UserController(DataContext context, IMapper mapper, ITokenService tokenService, ILogger<UserController> logger, IConfiguration config)
+        {
             _logger = logger;
             _context = context;
             _mapper = mapper;
             _tokenService = tokenService;
+            _config = config;
         }
 
-        private async void Client_Connected(string Message)
+        private async Task Client_Connected(string Message)
         {
             var Connect = new HostConnectLogModel()
             {
@@ -88,7 +90,13 @@ namespace Mubank.Controllers
             }
             else
             {
-
+                return Ok(_context.Users.Where(x => x.Id == id).Select(x => new UserDTO
+                {
+                    id = x.Id,
+                    name = x.Name,
+                    email = x.Email,
+                    password = x.Password
+                }).FirstOrDefault());
             }
              
         }
@@ -139,11 +147,15 @@ namespace Mubank.Controllers
                 return BadRequest(Error_Throwed("Id nulo, impossivel atualizar usuario sem o ID para authenticação"));                
             } else if (userupdate == null) 
             {
+
+
+                var str = new GeminiService();
+
                 return Conflict(new
                 {
                     Message = "Não tem oq atualizar, bruh",
                     DataDeHoje = DateTime.Now,
-                    MensagemDoDiaDoPastor = new GeminiService().SendHttpPost("Gere uma frase biblica para alegrar o dia de uma pessoa tudo em uma linha só sem conter a fonte dela,sem conter aspas, apenas a frase").GetAwaiter().GetResult()
+                    MensagemDoDiaDoPastor = await str.SendHttpPost("Gere uma frase biblica para alegrar o dia de uma pessoa tudo em uma linha só sem conter a fonte dela,sem conter aspas, apenas a frase", _config["ApiKeys:ApiGeminiKey"])
                 });
             } else
             {
