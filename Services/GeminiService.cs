@@ -1,37 +1,24 @@
 ﻿using Mubank.Models;
 using System.Text.Json;
 using System.Text;
+using GeminiSharp.Client;
+using GeminiSharp.Models.Response;
+
 
 namespace Mubank.Services
 {
     public class GeminiService
     {
-        public async Task<string> SendHttpPost()
+        public async Task<string> SendHttpPost(string message)
         {
             using (HttpClient client = new HttpClient())
             {
-                string BodyContent = JsonSerializer.Serialize<GeminiModel>(new GeminiModel()
-                {
-                    raiz = new Root()
-                    {
-                        Contents = new List<Content>()
-                        {
-                            new Content()
-                            {
-                                Parts = new List<Part>()
-                                {
-                                    new Part() { Text = "Gere uma frase biblica para alegrar o dia de uma pessoa de no maximo 30 linhas" }
-                                }
-                            }
-                        }
-                    }
-                });
-                var body = new StringContent(BodyContent, Encoding.UTF8, "application/json");
+                var apikey = "AIzaSyCWbTec8TIwOEFdWkq5FyNsLvRGM2PO58Y";
+                var GeminiClient = new GeminiClient(client, apikey);
 
+                var reponse = await GeminiClient.GenerateContentAsync("gemini-2.0", message);
 
-                var Result = await client.PostAsync("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyCWbTec8TIwOEFdWkq5FyNsLvRGM2PO58Y",body);
-
-                return await Result.Content.ReadAsStringAsync();
+                reponse.
             }
         }
     }
