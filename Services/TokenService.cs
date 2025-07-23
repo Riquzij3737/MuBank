@@ -26,7 +26,7 @@ namespace Mubank.Services
 
             var claims = new[]
             {
-                new Claim(Claims.Name, ClaimTypes.Role),
+                new Claim(ClaimTypes.Role,Claims.RoleName),
                 // adicione outras claims aqui
             };
 

