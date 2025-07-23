@@ -125,34 +125,9 @@ namespace Mubank.Controllers
                 return StatusCode(500, "Erro interno do servidor.");
             }
         }
-
-
-        [HttpGet]
-        [Route("GetOperationsRealized")]
-        public async Task<IActionResult> GetOperationsRealized()
-        {
-            try
-            {
-                var transationsRealized = await _context.Transations.ToListAsync();
-
-                if (transationsRealized == null || !transationsRealized.Any())
-                {
-                    _logger.LogInformation("Nenhuma transação realizada encontrada.");
-                    return NotFound("Nenhuma transação realizada encontrada.");
-                } else
-                {
-                    return Ok(transationsRealized);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Erro ao obter operações: {ex.Message}");
-                return StatusCode(500, "Erro interno do servidor.");
-                throw;
-            }
-        }
-
+        
         [HttpPost]
+        [Route("SendPostValue")]
         public async Task<IActionResult> SendPostValue(TransitionsDTO transitions)
         {
             if (!ModelState.IsValid)
@@ -230,6 +205,114 @@ namespace Mubank.Controllers
 
                 return StatusCode(500, error);
             }
+        }
+
+        [HttpGet]        
+        public async Task<IActionResult> GetOperationsRealized()
+        {
+            try
+            {
+                var transationsRealized = await _context.Transations.ToListAsync();
+
+                if (transationsRealized == null || !transationsRealized.Any())
+                {
+                    _logger.LogInformation("Nenhuma transação realizada encontrada.");
+                    return NotFound("Nenhuma transação realizada encontrada.");
+                }
+                else
+                {
+                    return Ok(transationsRealized);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Erro ao obter operações: {ex.Message}");
+                return StatusCode(500, "Erro interno do servidor.");
+                throw;
+            }
+        }
+
+
+        [HttpDelete]        
+        public async Task<IActionResult> DeleteOperation([FromQuery] Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                _logger.LogError("ID inválido fornecido para exclusão de operação.");
+                return BadRequest("ID inválido.");
+            }
+            try
+            {
+                var operation = await _context.Transations.FindAsync(id);
+                if (operation == null)
+                {
+                    _logger.LogInformation($"Operação com ID {id} não encontrada.");
+                    return NotFound("Operação não encontrada.");
+                }
+                _context.Transations.Remove(operation);
+                await _context.SaveChangesAsync();
+                _logger.LogInformation($"Operação com ID {id} excluída com sucesso.");
+                return Ok("Operação excluída com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao excluir a operação.");
+                return StatusCode(500, "Erro interno do servidor.");
+            }
+        }
+
+        [HttpPut]        
+        public async Task<IActionResult> UpdateOperation([FromBody] TransationsModel transation)
+        {
+            if (transation.Id == Guid.Empty)
+            {
+                _logger.LogError("Dados inválidos fornecidos para atualização de operação.");
+                return BadRequest("Dados inválidos.");
+            } else if (transation == null) 
+            {
+                var error = new ErrorModel()
+                {
+                    IdError = Guid.NewGuid(),
+                    MessageError = "Dados inválidos fornecidos para atualização de operação.",
+                    HttpStatusCode = 400,
+                    Date = DateTime.Now
+                };
+
+                _context.Errors.Add(error);
+
+                await _context.SaveChangesAsync();
+
+                return NotFound(new
+                {
+                    data = $"Hoje é {DateTime.Now.ToString("dd:MM:yyyy")}",
+                    MensagemDoServer = "Não tem oq atualizar mano",
+                    MensagemFilosofica = new GeminiService().SendHttpPost("Gere uma mensagem filosofica bonita e fofa para pensar feliz", _config["ApiSecrets:ApiGeminiKey"])                    
+                });
+
+            } else
+            {
+                var Dados = await _context.Transations.FindAsync(transation.Id);
+
+                if (Dados == null)
+                {
+                    _logger.LogInformation($"Operação com ID {transation.Id} não encontrada.");
+                    return NotFound("Operação não encontrada.");
+                } else
+                {
+                    Dados.IDDequemfez = transation.IDDequemfez;
+                    Dados.IDDequemrecebeu = transation.IDDequemrecebeu;
+                    Dados.TransationData = transation.TransationData;
+                    Dados.Description = transation.Description;
+                    Dados.Title = transation.Title;
+
+                    _context.Transations.Update(Dados);
+
+                    await _context.SaveChangesAsync();
+
+                    return Ok("deu certo fi");
+                }
+            }
+                
         }
 
 
