@@ -66,15 +66,7 @@ namespace Mubank
 
             app.UseHttpsRedirection();
 
-            app.UseAuthentication();
-
-            app.UseRegisterConnectionMiddleware();
-
-            app.UseRateLimitMiddleware();
-
-            app.UseBlockMongoliaPeopleMiddleware();
-
-            app.UseErrorMiddleware();
+            app.UseAuthentication();            
 
             app.UseAuthorization();
 

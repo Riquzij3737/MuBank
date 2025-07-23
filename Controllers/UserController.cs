@@ -12,6 +12,7 @@ namespace Mubank.Controllers
 {       
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize("Admin,Owner")]
     public class UserController : ControllerBase
     {
         private readonly DataContext _context;

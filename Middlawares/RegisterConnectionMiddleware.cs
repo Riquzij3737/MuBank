@@ -19,23 +19,43 @@ namespace Mubank.Middlawares
 
         public async Task InvokeAsync(HttpContext httpContext, DataContext context)
         {
-           
-            _context = context;
 
-            var Connect = new HostConnectLogModel()
+            try
             {
-                ConnectID = Guid.NewGuid(),
-                IpAddress = httpContext.Connection.LocalIpAddress.ToString(),
-                Message = $"usuario do ip: {httpContext.Connection.LocalIpAddress.ToString()} se conectou a api na data: {DateTime.Now} utilizando um metodo do tipo: {httpContext.Request.Method} na rota: {httpContext.GetEndpoint().DisplayName}",
-                Port = httpContext.Connection.LocalPort,
-                date = DateTime.Now
-            };
+                _context = context;
 
-            await _context.HostConnectLog.AddAsync(Connect);
+                var Connect = new HostConnectLogModel()
+                {
+                    ConnectID = Guid.NewGuid(),
+                    IpAddress = httpContext.Connection.LocalIpAddress.ToString(),
+                    Message = $"usuario do ip: {httpContext.Connection.LocalIpAddress.ToString()} se conectou a api na data: {DateTime.Now} utilizando um metodo do tipo: {httpContext.Request.Method} na rota: {httpContext.GetEndpoint().DisplayName}",
+                    Port = httpContext.Connection.LocalPort,
+                    date = DateTime.Now
+                };
 
-            await _context.SaveChangesAsync();
+                await _context.HostConnectLog.AddAsync(Connect);
+                
+            }
+            catch (Exception ex)
+            {
+                var error = new ErrorModel()
+                {
+                    IdError = Guid.NewGuid(),
+                    MessageError = ex.Message,
+                    HttpStatusCode = 500,
+                    Date = DateTime.Now
+                };
 
-             _next(httpContext);
+                await _context.Errors.AddAsync(error);
+                
+            } finally
+            {
+                await _context.SaveChangesAsync();
+
+                _next(httpContext);
+            }
+
+             
         }
     }
 

