@@ -9,15 +9,13 @@ namespace Mubank.Models
         [Required]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
-        [ForeignKey("Id")]
+        public Guid UserId { get; set; }
+        [Required]
+        [ForeignKey("UserId")]
         public UserModel User { get; set; }
         [Required]
         [StringLength(100)]
-        public string Country { get; set; } = "Unknown";
-        [Required]        
-        [StringLength(100)]
-        [InverseProperty("RemetenteId")]
-        public List<TransationsModel> Transactions { get; set; }
+        public string Country { get; set; } = "Unknown";        
         [Required]
         [DataType(DataType.DateTime)]
         public DateTime CreatedAt { get; set; } = DateTime.Now;

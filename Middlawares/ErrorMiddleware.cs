@@ -11,18 +11,19 @@ namespace Mubank.Middlawares
     public class ErrorMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly IMapper _mapper;
-        private readonly DataContext _context;
+        private IMapper _mapper;
+        private DataContext _context;
 
-        public ErrorMiddleware(RequestDelegate next, DataContext context, IMapper mapper)
+        public ErrorMiddleware(RequestDelegate next)
         {
             _next = next;
-            _context = context;
-            _mapper = mapper;
+            
         }
 
-        public Task Invoke(HttpContext httpContext)
+        public Task Invoke(HttpContext httpContext, DataContext context, IMapper mapper)
         {
+            _context = context;
+            _mapper = mapper;
 
             try
             {
@@ -37,8 +38,8 @@ namespace Mubank.Middlawares
                     HttpStatusCode = 500,
                     Date = DateTime.Now
                 };
-
-                var dto = new
+                
+                httpContext.Response.WriteAsJsonAsync(error);
                 throw;
             }
         }

@@ -9,6 +9,8 @@ namespace Mubank.Models
         [Required]
         public Guid Id { get; set; }
 
+        public Guid? AccountKey { get; set; }
+
         [Required]
         public string RoleName { get; set; } = "NormalUser";
 
@@ -26,6 +28,7 @@ namespace Mubank.Models
         [DataType(DataType.Password)]
         public string Password { get; set; }
         
+        [ForeignKey("AccountKey")]
         public AccountModel? Account { get; set; }
 
         public UserModel()

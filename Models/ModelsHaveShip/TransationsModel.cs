@@ -9,15 +9,14 @@ namespace Mubank.Models
         [Required]
         public Guid Id { get; set; }
 
-        // FK para quem enviou
+        
         [Required]
         public Guid RemetenteId { get; set; }
 
         [ForeignKey("RemetenteId")]
         [InverseProperty("TransaçõesEnviadas")]
         public AccountModel Remetente { get; set; }
-
-        // FK para quem recebeu
+        
         [Required]
         public Guid DestinatarioId { get; set; }
 

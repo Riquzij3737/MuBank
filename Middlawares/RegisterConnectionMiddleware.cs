@@ -10,17 +10,18 @@ namespace Mubank.Middlawares
     public class RegisterConnectionMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly DataContext _context;
+        private DataContext _context;
 
-        public RegisterConnectionMiddleware(RequestDelegate next, DataContext context)
+        public RegisterConnectionMiddleware(RequestDelegate next)
         {
-            _next = next;
-            _context = context;
+            _next = next;            
         }
 
-        public async Task InvokeAsync(HttpContext httpContext)
+        public async Task InvokeAsync(HttpContext httpContext, DataContext context)
         {
            
+            _context = context;
+
             var Connect = new HostConnectLogModel()
             {
                 ConnectID = Guid.NewGuid(),

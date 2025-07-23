@@ -15,6 +15,7 @@ namespace Mubank.Services
         public DbSet<ErrorModel> Errors { get; set; }
         public DbSet<HostConnectLogModel> HostConnectLog { get; set; }
         public DbSet<IPsBlockedModel> IPsBlocked { get; set; }
+        public DbSet<UserDataFULLModel> UserDataFULL { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -36,7 +37,13 @@ namespace Mubank.Services
                 .HasOne(t => t.Destinatario)
                 .WithMany(a => a.TransaçõesRecebidas)
                 .HasForeignKey(t => t.DestinatarioId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict);                                            
+
+            modelBuilder.Entity<UserDataFULLModel>()
+                .HasOne(u => u.User)
+                .WithMany()
+                .HasForeignKey(u => u.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 

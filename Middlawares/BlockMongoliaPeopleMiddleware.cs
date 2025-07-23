@@ -12,16 +12,17 @@ namespace Mubank.Middlawares
     {
         private readonly RequestDelegate _next;
         private readonly HashSet<string> _blockedIps = new();
-        private readonly DataContext _dataContext;
+        private DataContext _dataContext;
 
-        public BlockMongoliaPeopleMiddleware(RequestDelegate next, DataContext dataContext)
+        public BlockMongoliaPeopleMiddleware(RequestDelegate next)
         {
-            _next = next;
-            _dataContext = dataContext;
+            _next = next;            
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, DataContext dataContext)
         {
+
+            _dataContext = dataContext;
 
             var ip = context.Request.Headers.ContainsKey("X-Forwarded-For")
             ? context.Request.Headers["X-Forwarded-For"].ToString().Split(',')[0]
@@ -34,7 +35,7 @@ namespace Mubank.Middlawares
             {
                 if (GeoModel == null)
                 {
-                                       context.Response.StatusCode = 400;
+                    context.Response.StatusCode = 400;
                     await context.Response.WriteAsync("Could not retrieve geolocation data.");
                     return;
                 } else

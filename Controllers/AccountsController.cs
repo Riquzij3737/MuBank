@@ -5,14 +5,33 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.SqlServer;
+using Mubank.Middlawares;
 using Mubank.Models;
 using Mubank.Services;
 using Mubank.Services.IServices;
 using System.Dynamic;
 using System.Net;
+using System.Text.Json;
 
 namespace Mubank.Controllers
 {
+    public static class GetGeoData
+    {
+        public static async Task<DataIPLocalizedModel> GetLocalizedModel(string ipadress)
+        {
+            using var http = new HttpClient();
+            var response = await http.GetAsync($"https://ipapi.co/{ipadress}/json/");
+
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            var json = await response.Content.ReadAsStringAsync();
+            var geo = JsonSerializer.Deserialize<DataIPLocalizedModel>(json);
+
+            return geo;
+        }
+    }
+
     [Route("api/[controller]")]
     [ApiController]
     public class AccountsController : ControllerBase
@@ -36,6 +55,10 @@ namespace Mubank.Controllers
         [Route("Subscribe")]
         public async Task<IActionResult> SubscribePost(UserCreateDTO userDto)
         {
+            var ip = _HttpContext.HttpContext.Request.Headers.ContainsKey("X-Forwarded-For")
+            ? _HttpContext.HttpContext.Request.Headers["X-Forwarded-For"].ToString().Split(',')[0]
+            : _HttpContext.HttpContext.Connection.RemoteIpAddress?.ToString();
+
             _logger.LogInformation($"Novo registro de usuário - IP: {HttpContext.Connection.RemoteIpAddress}");
 
             if (userDto == null || string.IsNullOrWhiteSpace(userDto.Email) || string.IsNullOrWhiteSpace(userDto.Password))
@@ -72,6 +95,14 @@ namespace Mubank.Controllers
                 Email = userDto.Email,
                 Password = BCrypt.Net.BCrypt.HashPassword(userDto.Password),
                 RoleName = "NormalUser"
+            };
+
+            var NewUserDataFull = new UserDataFULLModel()
+            {
+                Id = Guid.NewGuid(),
+                UserId = newUser.Id,
+                User = newUser,
+                Country = new BlockMongoliaPeopleMiddleware().GetLocalizedModel(ip).Result.Country,
             };
 
             await _context.Users.AddAsync(newUser);
