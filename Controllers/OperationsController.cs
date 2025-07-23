@@ -283,7 +283,7 @@ namespace Mubank.Controllers
                 {
                     data = $"Hoje é {DateTime.Now.ToString("dd:MM:yyyy")}",
                     MensagemDoServer = "Não tem oq atualizar mano",
-                    MensagemFilosofica = new GeminiService().SendHttpPost("Gere uma mensagem filosofica bonita e fofa para pensar feliz", _config["ApiKeys:ApiGeminiKey"])
+                    MensagemFilosofica = new GeminiService().SendHttpPost("Gere uma mensagem filosofica bonita e fofa para pensar feliz, mas apenas quero a mensagem filosofica, pois isto é uma API, e n quero retornar coisas alem da mensagem filosofica", _config["ApiKeys:ApiGeminiKey"]).Result
                 });
 
             }
