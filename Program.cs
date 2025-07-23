@@ -37,7 +37,7 @@ namespace Mubank
             });
             builder.Services.AddDbContext<DataContext>(x =>            
             {
-                x.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+                x.UseSqlServer("Data Source=HENRIQZIN\\SQLEXPRESS;Initial Catalog=Mubank;Integrated Security=True;Pooling=False;Encrypt=True;Trust Server Certificate=True");
             });
             builder.Services.AddAuthentication(x =>
             {
