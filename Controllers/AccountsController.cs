@@ -98,15 +98,7 @@ namespace Mubank.Controllers
                 RoleName = "NormalUser"
             };
 
-            var NewUserDataFull = new UserDataFULLModel()
-            {
-                Id = Guid.NewGuid(),
-                UserId = newUser.Id,
-                User = newUser,
-                Country = GetGeoData.GetLocalizedModel(ip).Result.Country,
-            };
-
-            await _context.UserDataFULL.AddAsync(NewUserDataFull);
+                        
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
 
