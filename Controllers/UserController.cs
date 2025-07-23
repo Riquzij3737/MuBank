@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Mubank.Models;
+using Mubank.Models.DTOS;
 using Mubank.Services;
 using Mubank.Services.IServices;
 
@@ -49,7 +50,7 @@ namespace Mubank.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetUserAsync(Guid? id)
+        public async Task<IActionResult> GetUserAsync(Guid? id)
         {         
             if (id == null)
             {
@@ -58,14 +59,7 @@ namespace Mubank.Controllers
                 foreach (var user in _context.Users.ToList())
                 {
                     var userdto = _mapper.Map<UserModel, UserDTO>(user);
-
-                    userdto.password = string.Empty;
-
-                    for (int i = 0; i < user.Password.Length; i++)
-                    {
-                        userdto.password += "*";
-                    }
-
+                                        
                     dtos.Add(userdto);
                 }
 
@@ -73,13 +67,21 @@ namespace Mubank.Controllers
             }
             else
             {
-                return Ok(_context.Users.Where(x => x.Id == id).Select(x => new UserDTO
+                var a = await _context.Users.Where(x => x.Id == id).Select(x => x).FirstOrDefaultAsync();
+
+                var ReturnUserFULLdata = new UserFullDataDTO()
                 {
-                    id = x.Id,
-                    name = x.Name,
-                    email = x.Email,
-                    password = x.Password
-                }).FirstOrDefault());
+                    UserID = a.Id,
+                    Name = a.Name,
+                    Email = a.Email,
+                    DateCreated = DateTime.Now,
+                    RoleName = a.RoleName,
+                    Transactions = _context.Transations.Where(X => X.IDDequemfez == a.Id).ToList(),
+                    county = GetGeoData.GetLocalizedModel(HttpContext.Connection.RemoteIpAddress.ToString()).Result.Country,
+                    city = GetGeoData.GetLocalizedModel(HttpContext.Connection.RemoteIpAddress.ToString()).Result.City
+                };
+
+                return Ok(ReturnUserFULLdata);
             }
              
         }
@@ -103,14 +105,7 @@ namespace Mubank.Controllers
                     RoleName = "NormalUser"
                 };
 
-                var UserDto = _mapper.Map<UserModel, UserDTO>(model);
-                
-                UserDto.password = string.Empty;                
-
-                for (int i = 0; i < user.Password.Length;i++)
-                {
-                    UserDto.password += "*";
-                }
+                var UserDto = _mapper.Map<UserModel, UserDTO>(model);                                                
 
                 await _context.Users.AddAsync(model);
                 await _context.SaveChangesAsync();
@@ -152,11 +147,7 @@ namespace Mubank.Controllers
                 _context.Users.Update(user);
                 await _context.SaveChangesAsync();
                 var UserDto = _mapper.Map<UserModel, UserDTO>(user);
-                UserDto.password = string.Empty;
-                for (int i = 0; i < userupdate.Password.Length; i++)
-                {
-                    UserDto.password += "*";
-                }
+                
                 return Ok(UserDto);
             }
         }
