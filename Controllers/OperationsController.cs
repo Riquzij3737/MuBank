@@ -207,7 +207,8 @@ namespace Mubank.Controllers
             }
         }
 
-        [HttpGet]        
+        [HttpGet]
+        [Authorize(Roles = "Admin,Owner")]
         public async Task<IActionResult> GetOperationsRealized()
         {
             try
@@ -233,7 +234,8 @@ namespace Mubank.Controllers
         }
 
 
-        [HttpDelete]        
+        [HttpDelete]
+        [Authorize(Roles = "Admin,Owner")]
         public async Task<IActionResult> DeleteOperation([FromQuery] Guid id)
         {
             if (id == Guid.Empty)
@@ -261,7 +263,8 @@ namespace Mubank.Controllers
             }
         }
 
-        [HttpPut]        
+        [HttpPut]
+        [Authorize(Roles = "Admin,Owner")]
         public async Task<IActionResult> UpdateOperation([FromBody] TransationsModel? transation)
         {
 
@@ -334,6 +337,17 @@ namespace Mubank.Controllers
                 
         }
 
+        [HttpDelete]        
+        [Authorize(Roles = "Owner")]
+        [Route("DeleteAllOperations")]
+        public async Task<IActionResult> DeleteAllOperations()
+        {
+            _context.Transations.RemoveRange(_context.Transations);
+
+            await _context.SaveChangesAsync();
+
+            return Ok("Todas as operações foram excluídas com sucesso.");
+        }
 
     }
 }

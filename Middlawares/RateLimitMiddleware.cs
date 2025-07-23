@@ -1,52 +1,68 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Mubank.Models;
+using Mubank.Services;
 using System.Threading.Tasks;
 
 namespace Mubank.Middlawares
 {
     // You may need to install the Microsoft.AspNetCore.Http.Abstractions package into your project
-    public class RateLimitMiddleware
+    public class RateLimiterMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly Dictionary<string, int> RateLimits = new Dictionary<string, int>();
-        private static int ConectionsLentgh;
+        private static readonly Dictionary<string, List<DateTime>> _requests = new();
+        private static readonly object _lock = new();
 
-        public RateLimitMiddleware(RequestDelegate next)
+        private readonly int _limite = 100;
+        private readonly TimeSpan _intervalo = TimeSpan.FromMinutes(1);
+
+        public RateLimiterMiddleware(RequestDelegate next)
         {
             _next = next;
         }
 
-        public Task Invoke(HttpContext httpContext)
+        public async Task InvokeAsync(HttpContext context, DataContext dataContext)
         {
-            ConectionsLentgh++;
+            var ip = context.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "unknown";
 
-            foreach (var Rates in RateLimits)
+            lock (_lock)
             {
-                if (Rates.Key == httpContext.Connection.RemoteIpAddress.ToString())
+                if (!_requests.ContainsKey(ip))
+                    _requests[ip] = new List<DateTime>();
+                
+                _requests[ip].RemoveAll(dt => dt < DateTime.UtcNow - _intervalo);
+
+                if (_requests[ip].Count >= _limite)
                 {
-                    if (Rates.Value >= 100)
+                    context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                    context.Response.Headers["Retry-After"] = "60"; 
+
+                    dataContext.IPsBlocked.Add(new IPsBlockedModel()
                     {
-                        httpContext.Response.StatusCode = 429; // Too Many Requests
-                        return httpContext.Response.WriteAsync("Rate limit exceeded. Please try again later.");
-                    }
-                    else
-                    {
-                        RateLimits[Rates.Key] = Rates.Value + 1;
-                    }
+                        Ip = ip,
+                        DateBlocked = DateTime.UtcNow,
+                        Id = Guid.NewGuid(),
+                        Reason = "Rate limit exceeded"
+                    });
+
+                    dataContext.SaveChanges();
+                    return;
                 }
+
+                _requests[ip].Add(DateTime.UtcNow);
             }
 
-            RateLimits.Add(httpContext.Connection.RemoteIpAddress.ToString(), ConectionsLentgh);
-            return _next(httpContext);
+            await _next(context);
         }
     }
+
 
     // Extension method used to add the middleware to the HTTP request pipeline.
     public static class RateLimitMiddlewareExtensions
     {
         public static IApplicationBuilder UseRateLimitMiddleware(this IApplicationBuilder builder)
         {
-            return builder.UseMiddleware<RateLimitMiddleware>();
+            return builder.UseMiddleware<RateLimiterMiddleware>();
         }
     }
 }

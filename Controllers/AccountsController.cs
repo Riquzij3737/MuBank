@@ -166,7 +166,7 @@ namespace Mubank.Controllers
                 {
                      Name = usser.Name,
                      Email = usser.Email,
-                     RoleName = "Owner",
+                     RoleName = usser.RoleName,
                      JwtToken = _token.GenerationToken(usser)
                 });
 
