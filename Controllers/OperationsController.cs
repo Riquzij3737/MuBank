@@ -262,13 +262,10 @@ namespace Mubank.Controllers
         }
 
         [HttpPut]        
-        public async Task<IActionResult> UpdateOperation([FromBody] TransationsModel transation)
+        public async Task<IActionResult> UpdateOperation([FromBody] TransationsModel? transation)
         {
-            if (transation.Id == Guid.Empty)
-            {
-                _logger.LogError("Dados inválidos fornecidos para atualização de operação.");
-                return BadRequest("Dados inválidos.");
-            } else if (transation == null) 
+
+            if (transation == null)
             {
                 var error = new ErrorModel()
                 {
@@ -286,30 +283,52 @@ namespace Mubank.Controllers
                 {
                     data = $"Hoje é {DateTime.Now.ToString("dd:MM:yyyy")}",
                     MensagemDoServer = "Não tem oq atualizar mano",
-                    MensagemFilosofica = new GeminiService().SendHttpPost("Gere uma mensagem filosofica bonita e fofa para pensar feliz", _config["ApiSecrets:ApiGeminiKey"])                    
+                    MensagemFilosofica = new GeminiService().SendHttpPost("Gere uma mensagem filosofica bonita e fofa para pensar feliz", _config["ApiKeys:ApiGeminiKey"])
                 });
 
-            } else
+            }
+            else if (transation.Id == Guid.Empty)
             {
+                _logger.LogError("Dados inválidos fornecidos para atualização de operação.");
+                return BadRequest("Dados inválidos.");
+            } else { 
                 var Dados = await _context.Transations.FindAsync(transation.Id);
 
                 if (Dados == null)
                 {
                     _logger.LogInformation($"Operação com ID {transation.Id} não encontrada.");
                     return NotFound("Operação não encontrada.");
-                } else
+                }
+                else
                 {
-                    Dados.IDDequemfez = transation.IDDequemfez;
-                    Dados.IDDequemrecebeu = transation.IDDequemrecebeu;
-                    Dados.TransationData = transation.TransationData;
-                    Dados.Description = transation.Description;
-                    Dados.Title = transation.Title;
 
-                    _context.Transations.Update(Dados);
+                    try
+                    {
+                        Dados.IDDequemfez = transation.IDDequemfez;
+                        Dados.IDDequemrecebeu = transation.IDDequemrecebeu;
+                        Dados.TransationData = transation.TransationData;
+                        Dados.Description = transation.Description;
+                        Dados.Title = transation.Title;
 
-                    await _context.SaveChangesAsync();
+                        var user1 = await _context.Users.FindAsync(transation.IDDequemfez);
+                        var user2 = await _context.Users.FindAsync(transation.IDDequemrecebeu);
 
-                    return Ok("deu certo fi");
+                        user1.Value -= transation.Value;
+                        user2.Value += transation.Value;
+
+                        _context.Transations.Update(Dados);
+                        _context.Users.Update(user1);
+                        _context.Users.Update(user2);
+
+                        await _context.SaveChangesAsync();
+
+                        return Ok("Deu certo paizão");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Erro ao excluir a operação.");
+                        return StatusCode(500, "Erro interno do servidor.");
+                    }
                 }
             }
                 
