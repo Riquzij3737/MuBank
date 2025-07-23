@@ -1,8 +1,7 @@
 ﻿namespace Mubank.Models
 {
     public class TransitionsDTO
-    {
-        public Guid Id { get; set; }
+    {        
         public Guid IDDequemfez { get; set; }
         public Guid IDDequemrecebeu { get; set; }
         public string title {  get; set; }

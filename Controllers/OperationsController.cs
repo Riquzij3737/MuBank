@@ -3,6 +3,7 @@ using BCrypt.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Mubank.Models;
 using Mubank.Services;
@@ -11,8 +12,7 @@ using Mubank.Services.IServices;
 namespace Mubank.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
-    [Authorize("Admin,Owner,NormalUser")]
+    [ApiController]    
     public class OperationsController : ControllerBase
     {
         private readonly DataContext _context;
@@ -30,7 +30,7 @@ namespace Mubank.Controllers
             _config = config;
         }
 
-        [HttpGet("{pass")]
+        [HttpGet()]
         public async Task<IActionResult> GetIdUsingPass(UserCreateDTO Crendentiais)
         {
             if (Crendentiais == null || string.IsNullOrEmpty(Crendentiais.Password))
@@ -125,9 +125,9 @@ namespace Mubank.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SendPostValue(Guid QuemVaifazer, Guid QuemVaireceber, decimal Valor)
+        public async Task<IActionResult> SendPostValue(TransitionsDTO transitions)
         {
-            if (Valor <= 0)
+            if (transitions.Value <= 0)
             {
                 _logger.LogError("Valor inválido fornecido para a transação.");
                 return BadRequest("Valor inválido.");
@@ -135,7 +135,8 @@ namespace Mubank.Controllers
 
             try
             {
-                if (QuemVaifazer == Guid.Empty || QuemVaireceber == Guid.Empty)
+                
+                if (transitions.IDDequemfez == Guid.Empty || transitions.IDDequemrecebeu == Guid.Empty)
                 {
                     _logger.LogError("IDs inválidos fornecidos para a transação.");
                     return BadRequest("IDs inválidos.");
@@ -160,23 +161,43 @@ namespace Mubank.Controllers
                         user2.Value += Valor;
                         var transacao = new TransationsModel
                         {
+                            Id = Guid.NewGuid(),
                             IDDequemfez = QuemVaifazer,
                             IDDequemrecebeu = QuemVaireceber,
                             Value = Valor,
                             TransationData = DateTime.Now.ToString("dd:MM:yyyy"),
                         };
 
+                        _context.Users.Update(user1);
+                        _context.Users.Update(user2);
                         await _context.Transations.AddAsync(transacao);
 
                         await _context.SaveChangesAsync();
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
-                throw;
+                return StatusCode(500, () =>
+                {
+                    var error = new ErrorModel()
+                    {
+                        IdError = Guid.NewGuid(),
+                        MessageError = ex.Message,
+                        HttpStatusCode = 500,
+                        Date = DateTime.Now
+                    };
+
+                    _context.Errors.Add(error);
+
+                    _context.SaveChanges();
+
+                    return error;
+                });
             }
+
+            return StatusCode(500, "Pega no meu bilau quadrado");
         }
 
     }

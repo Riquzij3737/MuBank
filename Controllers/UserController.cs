@@ -49,8 +49,7 @@ namespace Mubank.Controllers
 
             return dto;
         }
-
-        []
+        
 
         [HttpGet]
         public async Task<IActionResult> GetUserAsync(Guid? id)
