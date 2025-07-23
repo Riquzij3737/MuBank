@@ -27,14 +27,6 @@ namespace Mubank.Controllers
             _config = config;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> SendTransation(Guid IdRemetente, Guid IdReciver, decimal Value)
-        {
-            if (IdReciver == Guid.Empty || IdRemetente == Guid.Empty || Value <= 0)
-            {
-                
-            }
-        }
     }
 
 

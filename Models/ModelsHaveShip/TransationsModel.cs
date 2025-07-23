@@ -15,7 +15,6 @@ namespace Mubank.Models
         public Guid IDDequemrecebeu { get; set; }
 
         [Required]
-
         public decimal Value { get; set; }
 
         [Required]

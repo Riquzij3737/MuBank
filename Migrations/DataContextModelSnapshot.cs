@@ -22,23 +22,6 @@ namespace Mubank.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Mubank.Models.AccountModel", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Accounts");
-                });
-
             modelBuilder.Entity("Mubank.Models.ErrorModel", b =>
                 {
                     b.Property<Guid>("IdError")
@@ -123,10 +106,10 @@ namespace Mubank.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<Guid>("DestinatarioId")
+                    b.Property<Guid>("IDDequemfez")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("RemetenteId")
+                    b.Property<Guid>("IDDequemrecebeu")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Title")
@@ -143,44 +126,13 @@ namespace Mubank.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DestinatarioId");
-
-                    b.HasIndex("RemetenteId");
-
                     b.ToTable("Transations");
-                });
-
-            modelBuilder.Entity("Mubank.Models.UserDataFULLModel", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserDataFULL");
                 });
 
             modelBuilder.Entity("Mubank.Models.UserModel", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("AccountKey")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
@@ -202,62 +154,12 @@ namespace Mubank.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("Value")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("Mubank.Models.AccountModel", b =>
-                {
-                    b.HasOne("Mubank.Models.UserModel", "User")
-                        .WithOne("Account")
-                        .HasForeignKey("Mubank.Models.AccountModel", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Mubank.Models.TransationsModel", b =>
-                {
-                    b.HasOne("Mubank.Models.AccountModel", "Destinatario")
-                        .WithMany("TransaçõesRecebidas")
-                        .HasForeignKey("DestinatarioId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Mubank.Models.AccountModel", "Remetente")
-                        .WithMany("TransaçõesEnviadas")
-                        .HasForeignKey("RemetenteId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Destinatario");
-
-                    b.Navigation("Remetente");
-                });
-
-            modelBuilder.Entity("Mubank.Models.UserDataFULLModel", b =>
-                {
-                    b.HasOne("Mubank.Models.UserModel", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Mubank.Models.AccountModel", b =>
-                {
-                    b.Navigation("TransaçõesEnviadas");
-
-                    b.Navigation("TransaçõesRecebidas");
-                });
-
-            modelBuilder.Entity("Mubank.Models.UserModel", b =>
-                {
-                    b.Navigation("Account");
                 });
 #pragma warning restore 612, 618
         }

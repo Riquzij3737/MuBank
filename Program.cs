@@ -1,5 +1,6 @@
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Mubank.Middlawares;
@@ -13,9 +14,9 @@ namespace Mubank
     {
         public static void Main(string[] args)
         {            
-            var builder = WebApplication.CreateBuilder(args);            
+            var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.            
+            // Add services to the container.           
             builder.Services.AddControllers();
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddHttpContextAccessor();
@@ -62,7 +63,7 @@ namespace Mubank
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-            }
+            }            
 
             app.UseHttpsRedirection();
 

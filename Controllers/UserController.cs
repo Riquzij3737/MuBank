@@ -8,12 +8,13 @@ using Mubank.Models;
 using Mubank.Models.DTOS;
 using Mubank.Services;
 using Mubank.Services.IServices;
+using System.Net.Http;
 
 namespace Mubank.Controllers
 {       
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize("Admin,Owner")]
+    // [Authorize(Roles = "Admins,Owner")]
     public class UserController : ControllerBase
     {
         private readonly DataContext _context;
@@ -49,9 +50,12 @@ namespace Mubank.Controllers
             return dto;
         }
 
+        []
+
         [HttpGet]
         public async Task<IActionResult> GetUserAsync(Guid? id)
-        {         
+        {            
+
             if (id == null)
             {
                 List<UserDTO> dtos = new List<UserDTO>();
@@ -69,19 +73,26 @@ namespace Mubank.Controllers
             {
                 var a = await _context.Users.Where(x => x.Id == id).Select(x => x).FirstOrDefaultAsync();
 
-                var ReturnUserFULLdata = new UserFullDataDTO()
+                if (a == null)
                 {
-                    UserID = a.Id,
-                    Name = a.Name,
-                    Email = a.Email,
-                    DateCreated = DateTime.Now,
-                    RoleName = a.RoleName,
-                    Transactions = _context.Transations.Where(X => X.IDDequemfez == a.Id).ToList(),
-                    county = GetGeoData.GetLocalizedModel(HttpContext.Connection.RemoteIpAddress.ToString()).Result.Country,
-                    city = GetGeoData.GetLocalizedModel(HttpContext.Connection.RemoteIpAddress.ToString()).Result.City
-                };
+                    return NotFound(Error_Throwed("Usuario não encontrado"));
+                } else
+                {                    
 
-                return Ok(ReturnUserFULLdata);
+                    var ReturnUserFULLdata = new UserFullDataDTO()
+                    {
+                        UserID = a.Id,
+                        Name = a.Name,
+                        Email = a.Email,
+                        DateCreated = DateTime.Now,
+                        RoleName = a.RoleName,
+                        Transactions = _context.Transations.Where(X => X.IDDequemfez == a.Id).ToList() ?? null,                        
+                    };
+
+                    return Ok(ReturnUserFULLdata);
+                }
+
+                    
             }
              
         }
