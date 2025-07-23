@@ -9,8 +9,7 @@ namespace Mubank.Middlawares
     // You may need to install the Microsoft.AspNetCore.Http.Abstractions package into your project
     public class RegisterConnectionMiddleware
     {
-        private readonly RequestDelegate _next;
-        private DataContext _context;
+        private readonly RequestDelegate _next;        
 
         public RegisterConnectionMiddleware(RequestDelegate next)
         {
@@ -20,15 +19,16 @@ namespace Mubank.Middlawares
         public async Task InvokeAsync(HttpContext httpContext, DataContext context)
         {
 
+            var _context = context;
+
             try
-            {
-                _context = context;
+            {                
 
                 var Connect = new HostConnectLogModel()
                 {
                     ConnectID = Guid.NewGuid(),
                     IpAddress = httpContext.Connection.LocalIpAddress.ToString(),
-                    Message = $"usuario do ip: {httpContext.Connection.LocalIpAddress.ToString()} se conectou a api na data: {DateTime.Now} utilizando um metodo do tipo: {httpContext.Request.Method} na rota: {httpContext.GetEndpoint().DisplayName}",
+                    Message = $"usuario do ip: {httpContext.Connection.LocalIpAddress.ToString()} se conectou a api na data: {DateTime.Now} utilizando um metodo do tipo: {httpContext.Request.Method}",
                     Port = httpContext.Connection.LocalPort,
                     date = DateTime.Now
                 };

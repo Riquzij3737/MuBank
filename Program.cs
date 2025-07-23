@@ -71,6 +71,11 @@ namespace Mubank
 
             app.UseHttpsRedirection();
 
+            app.UseRegisterConnectionMiddleware();
+            app.UseSearchBlockIPsMiddleware();
+            app.UseRateLimitMiddleware();
+            app.UseErrorMiddleware();
+
             app.UseAuthentication();            
 
             app.UseAuthorization();

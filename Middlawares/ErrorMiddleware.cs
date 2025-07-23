@@ -10,9 +10,7 @@ namespace Mubank.Middlawares
     // You may need to install the Microsoft.AspNetCore.Http.Abstractions package into your project
     public class ErrorMiddleware
     {
-        private readonly RequestDelegate _next;
-        private IMapper _mapper;
-        private DataContext _context;
+        private readonly RequestDelegate _next;        
 
         public ErrorMiddleware(RequestDelegate next)
         {
@@ -21,10 +19,7 @@ namespace Mubank.Middlawares
         }
 
         public Task Invoke(HttpContext httpContext, DataContext context, IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-
+        {                        
             try
             {
                 return _next(httpContext);
@@ -39,6 +34,10 @@ namespace Mubank.Middlawares
                     Date = DateTime.Now
                 };
                 
+                context.Errors.Add(error);
+
+                context.SaveChanges();
+
                 httpContext.Response.WriteAsJsonAsync(error);
                 throw;
             }
