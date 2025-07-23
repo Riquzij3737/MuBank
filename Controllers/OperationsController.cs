@@ -20,6 +20,7 @@ namespace Mubank.Controllers
         private readonly ITokenService _tokenService;
         private readonly ILogger<OperationsController> _logger;
         private readonly IConfiguration _config;
+        private readonly List<TransationsModel> _transations = new List<TransationsModel>();
 
         public OperationsController(DataContext context, IMapper mapper, ITokenService tokenService, ILogger<OperationsController> logger, IConfiguration config)
         {
@@ -82,9 +83,10 @@ namespace Mubank.Controllers
                     return Ok(Operations);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                _logger.LogError($"Erro ao obter operações: {ex.Message}");
+                return StatusCode(500, "Erro interno do servidor.");
                 throw;
             }
 
@@ -122,6 +124,32 @@ namespace Mubank.Controllers
             {
                 _logger.LogError($"Erro ao obter operações: {ex.Message}");
                 return StatusCode(500, "Erro interno do servidor.");
+            }
+        }
+
+
+        [HttpGet]
+        [Route("GetOperationsRealized")]
+        public async Task<IActionResult> GetOperationsRealized()
+        {
+            try
+            {
+                var transationsRealized = await _context.Transations.ToListAsync();
+
+                if (transationsRealized == null || !transationsRealized.Any())
+                {
+                    _logger.LogInformation("Nenhuma transação realizada encontrada.");
+                    return NotFound("Nenhuma transação realizada encontrada.");
+                } else
+                {
+                    return Ok(transationsRealized);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Erro ao obter operações: {ex.Message}");
+                return StatusCode(500, "Erro interno do servidor.");
+                throw;
             }
         }
 
@@ -183,6 +211,8 @@ namespace Mubank.Controllers
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
+
+                _transations.Add(transacao);
 
                 return Ok("Transação realizada com sucesso.");
             }
