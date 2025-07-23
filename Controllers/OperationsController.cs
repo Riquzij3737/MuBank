@@ -30,7 +30,8 @@ namespace Mubank.Controllers
             _config = config;
         }
 
-        [HttpGet()]
+        [HttpGet]
+        [Route("GetIdUsingPass")]
         public async Task<IActionResult> GetIdUsingPass(UserCreateDTO Crendentiais)
         {
             if (Crendentiais == null || string.IsNullOrEmpty(Crendentiais.Password))
@@ -142,8 +143,8 @@ namespace Mubank.Controllers
                     return BadRequest("IDs inválidos.");
                 } else
                 {
-                    var user1 = await _context.Users.FindAsync(QuemVaifazer);
-                    var user2 = await _context.Users.FindAsync(QuemVaireceber);
+                    var user1 = await _context.Users.FindAsync(transitions.IDDequemfez);
+                    var user2 = await _context.Users.FindAsync(transitions.IDDequemrecebeu);
 
                     if (user1 == null || user2 == null)
                     {
@@ -151,20 +152,22 @@ namespace Mubank.Controllers
                         return NotFound("Usuário não encontrado.");
                     } else
                     {
-                        if (user1.Value < Valor)
+                        if (user1.Value < transitions.Value)
                         {
                             _logger.LogError("Saldo insuficiente para a transação.");
                             return BadRequest("Saldo insuficiente.");
                         }
                       
-                        user1.Value -= Valor;
-                        user2.Value += Valor;
+                        user1.Value -= transitions.Value;
+                        user2.Value += transitions.Value;
                         var transacao = new TransationsModel
                         {
                             Id = Guid.NewGuid(),
-                            IDDequemfez = QuemVaifazer,
-                            IDDequemrecebeu = QuemVaireceber,
-                            Value = Valor,
+                            IDDequemfez = transitions.IDDequemfez,
+                            IDDequemrecebeu = transitions.IDDequemrecebeu,
+                            Value = transitions.Value,
+                            Title = transitions.title,
+                            Description = transitions.description,                            
                             TransationData = DateTime.Now.ToString("dd:MM:yyyy"),
                         };
 

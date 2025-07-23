@@ -6,7 +6,9 @@ using Microsoft.IdentityModel.Tokens;
 using Mubank.Middlawares;
 using Mubank.Services;
 using Mubank.Services.IServices;
+using Mubank.Models.DTOS;
 using System.Text;
+
 
 namespace Mubank
 {
@@ -14,10 +16,12 @@ namespace Mubank
     {
         public static void Main(string[] args)
         {            
-            var builder = WebApplication.CreateBuilder(args);
+            var builder = WebApplication.CreateBuilder(args);            
 
             // Add services to the container.           
             builder.Services.AddControllers();
+            builder.Configuration.AddJsonFile("C:\\Visual Studio Projects\\_NetProjects\\C#\\Mubank\\appsettings.Development.json");
+    
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddLogging();
@@ -33,7 +37,7 @@ namespace Mubank
             });
             builder.Services.AddDbContext<DataContext>(x =>            
             {
-                x.UseSqlServer("Data Source=HENRIQZIN\\SQLEXPRESS;Initial Catalog=Mubank;Integrated Security=True;Pooling=False;Encrypt=True;Trust Server Certificate=True");
+                x.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
             builder.Services.AddAuthentication(x =>
             {
@@ -72,10 +76,13 @@ namespace Mubank
             app.UseAuthorization();
 
             app.MapControllers();
+            
 
-            app.UseCors("AllowAll");
+            app.UseCors("AllowAll");            
 
             app.Run();
+
+            
         }
     }
 }

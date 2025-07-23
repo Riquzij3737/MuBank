@@ -55,11 +55,7 @@ namespace Mubank.Controllers
         [HttpPost]
         [Route("Subscribe")]
         public async Task<IActionResult> SubscribePost(UserCreateDTO userDto)
-        {
-            var ip = _HttpContext.HttpContext.Request.Headers.ContainsKey("X-Forwarded-For")
-            ? _HttpContext.HttpContext.Request.Headers["X-Forwarded-For"].ToString().Split(',')[0]
-            : _HttpContext.HttpContext.Connection.RemoteIpAddress?.ToString();
-
+        {           
             _logger.LogInformation($"Novo registro de usuário - IP: {HttpContext.Connection.RemoteIpAddress}");
 
             if (userDto == null || string.IsNullOrWhiteSpace(userDto.Email) || string.IsNullOrWhiteSpace(userDto.Password))
