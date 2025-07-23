@@ -28,23 +28,7 @@ namespace Mubank.Controllers
             _tokenService = tokenService;
             _config = config;
         }
-
-        private async Task Client_Connected(string Message)
-        {
-            var Connect = new HostConnectLogModel()
-            {
-                ConnectID = Guid.NewGuid(),
-                IpAddress = HttpContext.Connection.LocalIpAddress.ToString(),
-                Message = Message,
-                Port = HttpContext.Connection.LocalPort,
-                date = DateTime.Now
-            };
-
-            await _context.HostConnectLog.AddAsync(Connect);
-
-            await _context.SaveChangesAsync();
-        }
-
+       
         private async Task<object> Error_Throwed(string Message)
         {
 
@@ -65,9 +49,7 @@ namespace Mubank.Controllers
 
         [HttpGet]
         public IActionResult GetUserAsync(Guid? id)
-        {
-            Client_Connected("Cliente conectado na rota /api/user para usar o seu metodo GET para receber os usuarios presentes no banco de dados");
-
+        {         
             if (id == null)
             {
                 List<UserDTO> dtos = new List<UserDTO>();
@@ -139,9 +121,7 @@ namespace Mubank.Controllers
 
         [HttpPut]
         public async Task<IActionResult> UpdateUser(Guid idForSearch, UserCreateDTO? userupdate)
-        {
-            Client_Connected("Usuario conectado para atualizar algum dado de usuarios do banco de dados da api");
-
+        {            
             if (idForSearch == null)
             {
                 return BadRequest(Error_Throwed("Id nulo, impossivel atualizar usuario sem o ID para authenticação"));                
@@ -182,8 +162,7 @@ namespace Mubank.Controllers
 
         [HttpDelete]
         public async Task<IActionResult> DeleteUser(Guid idForSearch)
-        {
-            Client_Connected("Usuario conectado para deletar algum usuario do banco de dados da api");
+        {            
             if (idForSearch == null)
             {
                 return BadRequest(Error_Throwed("Id nulo, impossivel deletar usuario sem o ID para authenticação"));

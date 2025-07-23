@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Mubank.Middlawares;
 using Mubank.Services;
 using Mubank.Services.IServices;
 using System.Text;
@@ -66,6 +67,14 @@ namespace Mubank
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
+
+            app.UseRegisterConnectionMiddleware();
+
+            app.UseRateLimitMiddleware();
+
+            app.UseBlockMongoliaPeopleMiddleware();
+
+            app.UseErrorMiddleware();
 
             app.UseAuthorization();
 
