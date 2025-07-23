@@ -19,8 +19,7 @@ namespace Mubank.Controllers
         private readonly IMapper _mapper;
         private readonly ITokenService _tokenService;
         private readonly ILogger<OperationsController> _logger;
-        private readonly IConfiguration _config;
-        private readonly List<TransationsModel> _transations = new List<TransationsModel>();
+        private readonly IConfiguration _config;        
 
         public OperationsController(DataContext context, IMapper mapper, ITokenService tokenService, ILogger<OperationsController> logger, IConfiguration config)
         {
@@ -210,9 +209,7 @@ namespace Mubank.Controllers
                 await _context.Transations.AddAsync(transacao);
 
                 await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                _transations.Add(transacao);
+                await transaction.CommitAsync();                
 
                 return Ok("Transação realizada com sucesso.");
             }
