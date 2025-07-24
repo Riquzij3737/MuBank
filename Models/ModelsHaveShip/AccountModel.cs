@@ -19,10 +19,10 @@ namespace Mubank.Models.ModelsHaveShip
         public decimal Value { get; set; } = 0;
         
         public CardModel? Card { get; set; }
-
-        [InverseProperty("AccountDeQuemFez")]
-        public List<TransationsModel> TransationsRecived { get; set; }
+        
         [InverseProperty("AccountDeQuemRecebeu")]
+        public List<TransationsModel> TransationsRecived { get; set; }
+        [InverseProperty("AccountDeQuemFez")]
         public List<TransationsModel> TransationsMade { get; set; }
     }
 }

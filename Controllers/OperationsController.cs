@@ -147,8 +147,8 @@ namespace Mubank.Controllers
 
             try
             {
-                var user1 = await _context.Users.FindAsync(transitions.IDDequemfez);
-                var user2 = await _context.Users.FindAsync(transitions.IDDequemrecebeu);
+                var user1 = await _context.Accounts.FindAsync(transitions.IDDequemfez);
+                var user2 = await _context.Accounts.FindAsync(transitions.IDDequemrecebeu);
 
                 if (user1 == null || user2 == null)
                 {
@@ -179,8 +179,8 @@ namespace Mubank.Controllers
                     TransationData = DateTime.Now.ToString("dd:MM:yyyy"), // mudar propriedade para DateTime
                 };
 
-                _context.Users.Update(user1);
-                _context.Users.Update(user2);
+                _context.Accounts.Update(user1);
+                _context.Accounts.Update(user2);
                 await _context.Transations.AddAsync(transacao);
 
                 await _context.SaveChangesAsync();
@@ -313,15 +313,15 @@ namespace Mubank.Controllers
                         Dados.Description = transation.Description;
                         Dados.Title = transation.Title;
 
-                        var user1 = await _context.Users.FindAsync(transation.IDDequemfez);
-                        var user2 = await _context.Users.FindAsync(transation.IDDequemrecebeu);
+                        var user1 = await _context.Accounts.FindAsync(transation.IDDequemfez);
+                        var user2 = await _context.Accounts.FindAsync(transation.IDDequemrecebeu);
 
                         user1.Value -= transation.Value;
                         user2.Value += transation.Value;
 
                         _context.Transations.Update(Dados);
-                        _context.Users.Update(user1);
-                        _context.Users.Update(user2);
+                        _context.Accounts.Update(user1);
+                        _context.Accounts.Update(user2);
 
                         await _context.SaveChangesAsync();
 

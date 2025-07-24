@@ -7,9 +7,7 @@ namespace Mubank.Services
 {
     public class DataContext : DbContext
     {
-        public DataContext(DbContextOptions<DataContext> options) : base(options)
-        {
-        }
+        public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
         public DbSet<UserModel> Users { get; set; }
         public DbSet<TransationsModel> Transations { get; set; }
@@ -21,31 +19,33 @@ namespace Mubank.Services
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // User ↔ Account (1:1)
             modelBuilder.Entity<UserModel>()
                 .HasOne(a => a.Account)
                 .WithOne(u => u.UserAccount)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Account ↔ Card (1:1)
             modelBuilder.Entity<AccountModel>()
                 .HasOne(a => a.Card)
                 .WithOne(c => c.Account)
                 .HasForeignKey<CardModel>(c => c.AccountId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-
+            // Account → TransationsMade (quem fez)
             modelBuilder.Entity<AccountModel>()
-                .HasMany(t => t.TransationsRecived)
+                .HasMany(a => a.TransationsMade)
                 .WithOne(t => t.AccountDeQuemFez)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Cascade); // ← quem fez pode apagar
 
+            // Account → TransationsReceived (quem recebeu)
             modelBuilder.Entity<AccountModel>()
-                .HasMany(t => t.TransationsMade)
+                .HasMany(a => a.TransationsRecived)
                 .WithOne(t => t.AccountDeQuemRecebeu)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.NoAction); // ← evita cascata dupla
 
             base.OnModelCreating(modelBuilder);
         }
-  
     }
 
     public class DataContextFactory : IDesignTimeDbContextFactory<DataContext>

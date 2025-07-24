@@ -12,8 +12,8 @@ using Mubank.Services;
 namespace Mubank.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250723024350_initial4.1")]
-    partial class initial41
+    [Migration("20250724033515_initial1")]
+    partial class initial1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -98,6 +98,61 @@ namespace Mubank.Migrations
                     b.ToTable("IPsBlocked");
                 });
 
+            modelBuilder.Entity("Mubank.Models.ModelsHaveShip.AccountModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Accounts");
+                });
+
+            modelBuilder.Entity("Mubank.Models.ModelsHaveShip.CardModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CardHolderName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CardNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CardType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreationDatae")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpirationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId")
+                        .IsUnique();
+
+                    b.ToTable("Cards");
+                });
+
             modelBuilder.Entity("Mubank.Models.TransationsModel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -129,6 +184,10 @@ namespace Mubank.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("IDDequemfez");
+
+                    b.HasIndex("IDDequemrecebeu");
+
                     b.ToTable("Transations");
                 });
 
@@ -153,16 +212,65 @@ namespace Mubank.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Value")
-                        .HasColumnType("decimal(18,2)");
-
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Mubank.Models.ModelsHaveShip.AccountModel", b =>
+                {
+                    b.HasOne("Mubank.Models.UserModel", "UserAccount")
+                        .WithOne("Account")
+                        .HasForeignKey("Mubank.Models.ModelsHaveShip.AccountModel", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserAccount");
+                });
+
+            modelBuilder.Entity("Mubank.Models.ModelsHaveShip.CardModel", b =>
+                {
+                    b.HasOne("Mubank.Models.ModelsHaveShip.AccountModel", "Account")
+                        .WithOne("Card")
+                        .HasForeignKey("Mubank.Models.ModelsHaveShip.CardModel", "AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("Mubank.Models.TransationsModel", b =>
+                {
+                    b.HasOne("Mubank.Models.ModelsHaveShip.AccountModel", "AccountDeQuemFez")
+                        .WithMany("TransationsMade")
+                        .HasForeignKey("IDDequemfez")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Mubank.Models.ModelsHaveShip.AccountModel", "AccountDeQuemRecebeu")
+                        .WithMany("TransationsRecived")
+                        .HasForeignKey("IDDequemrecebeu")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("AccountDeQuemFez");
+
+                    b.Navigation("AccountDeQuemRecebeu");
+                });
+
+            modelBuilder.Entity("Mubank.Models.ModelsHaveShip.AccountModel", b =>
+                {
+                    b.Navigation("Card");
+
+                    b.Navigation("TransationsMade");
+
+                    b.Navigation("TransationsRecived");
+                });
+
+            modelBuilder.Entity("Mubank.Models.UserModel", b =>
+                {
+                    b.Navigation("Account")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

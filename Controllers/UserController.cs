@@ -50,12 +50,6 @@ namespace Mubank.Controllers
             return dto;
         }
 
-        /// <summary>
-        /// Retorna todos os usuários cadastrados.
-        /// </summary>
-        /// <returns>Lista de usuários</returns>
-        /// <response code="200">Usuários retornados com sucesso</response>
-        /// <response code="500">Erro interno</response>
         [HttpGet]
         public async Task<IActionResult> GetUserAsync(Guid? id)
         {            
@@ -89,7 +83,7 @@ namespace Mubank.Controllers
                         Name = a.Name,
                         Email = a.Email,
                         DateCreated = DateTime.Now,
-                        RoleName = a.RoleName,
+                        RoleName = _context.Accounts.Find(a.Id).RoleName,
                         Transactions = _context.Transations.Where(X => X.IDDequemfez == a.Id).ToList() ?? null,                        
                     };
 
@@ -117,7 +111,14 @@ namespace Mubank.Controllers
                     Name = user.Name,
                     Email = user.Email,
                     Password = BCrypt.Net.BCrypt.HashPassword(user.Password),
-                    RoleName = "NormalUser"
+                    Account = new Models.ModelsHaveShip.AccountModel
+                    {
+                        Id = Id,
+                        RoleName = "NormalUser",
+                        Value = 0,
+                        TransationsMade = new List<TransationsModel>(),
+                        TransationsRecived = new List<TransationsModel>()
+                    },
                 };
 
                 var UserDto = _mapper.Map<UserModel, UserDTO>(model);                                                
@@ -157,8 +158,7 @@ namespace Mubank.Controllers
                 }
                 user.Name = userupdate.Name;
                 user.Email = userupdate.Email;
-                user.Password = BCrypt.Net.BCrypt.HashPassword(userupdate.Password);
-                user.RoleName = "NormalUser";
+                user.Password = BCrypt.Net.BCrypt.HashPassword(userupdate.Password);                
                 _context.Users.Update(user);
                 await _context.SaveChangesAsync();
                 var UserDto = _mapper.Map<UserModel, UserDTO>(user);

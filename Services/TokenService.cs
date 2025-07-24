@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.IdentityModel.Tokens;
 using Mubank.Models;
+using Mubank.Models.ModelsHaveShip;
 using Mubank.Services.IServices;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -20,7 +21,7 @@ namespace Mubank.Services
             _configuration = configuration;        
         }
 
-        public string GenerationToken(UserModel Claims)
+        public string GenerationToken(AccountModel Claims)
         {
             var key = Encoding.UTF8.GetBytes(_configuration["JwtSecrets:Secretkey"]);
 

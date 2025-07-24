@@ -85,16 +85,25 @@ namespace Mubank.Controllers
                 return Conflict(new { message = "Email já está em uso." });
             }
 
+            var count = new Models.ModelsHaveShip.AccountModel
+            {
+                Id = Guid.NewGuid(),
+                RoleName = "NormalUser",
+                Value = 0,
+                TransationsMade = new List<TransationsModel>(),
+                TransationsRecived = new List<TransationsModel>()
+            };
+
             // Cria novo usuário
             var newUser = new UserModel
             {
                 Name = userDto.Name,
                 Email = userDto.Email,
                 Password = BCrypt.Net.BCrypt.HashPassword(userDto.Password),
-                RoleName = "NormalUser"
+                Account = count
             };
 
-                        
+            await _context.Accounts.AddAsync(count);
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
 
@@ -103,8 +112,10 @@ namespace Mubank.Controllers
             {
                 Name = newUser.Name,
                 Email = newUser.Email,
-                RoleName = newUser.RoleName,
-                JwtToken = _token.GenerationToken(newUser)
+                RoleName = _context.Accounts.Where(a => a.UserAccount.Id == newUser.Id)
+                    .Select(a => a.RoleName)
+                    .FirstOrDefault() ?? "NormalUser",
+                JwtToken = _token.GenerationToken(_context.Accounts.Find(newUser.Id))
             };
 
             return Ok(response);
@@ -150,10 +161,11 @@ namespace Mubank.Controllers
                     UserID = usser.Id,
                     Name = usser.Name,
                     Email = usser.Email,
-                    RoleName = usser.RoleName,
+                    RoleName = _context.Accounts.Where(a => a.UserAccount.Id == usser.Id).Select(a => a.RoleName).FirstOrDefault() ?? "Unknow",
                     DateCreated = DateTime.Now,
-                    JwtToken = _token.GenerationToken(usser),
-                    Transactions = await _context.Transations.Where(x => x.IDDequemfez == usser.Id).ToListAsync() ?? null
+                    JwtToken = _token.GenerationToken(_context.Accounts.Find(usser.Id)),
+                    Transactions = _context.Transations.Where(x => x.IDDequemfez == usser.Id).ToList() ?? null                                        
+                    
                 });
 
             }
@@ -181,9 +193,9 @@ namespace Mubank.Controllers
                     UserID = verifiedUser.Id,
                     Name = verifiedUser.Name,
                     Email = verifiedUser.Email,
-                    RoleName = verifiedUser.RoleName,
+                    RoleName = _context.Accounts.Where(a => a.UserAccount.Id == verifiedUser.Id).Select(a => a.RoleName).FirstOrDefault() ?? "Unknow",
                     DateCreated = DateTime.Now,
-                    JwtToken = _token.GenerationToken(verifiedUser),
+                    JwtToken = _token.GenerationToken(_context.Accounts.Find(verifiedUser.Id)),
                     Transactions = _context.Transations.Where(x => x.IDDequemfez == verifiedUser.Id).ToList() ?? null
                 });
         }
