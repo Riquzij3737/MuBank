@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Mubank.Models.ModelsHaveShip;
+
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Mubank.Models
@@ -8,9 +10,6 @@ namespace Mubank.Models
         [Key]
         [Required]
         public Guid Id { get; set; }        
-
-        [Required]
-        public string RoleName { get; set; } = "NormalUser";
 
         [Required]
         [StringLength(100)]
@@ -26,8 +25,9 @@ namespace Mubank.Models
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        [Length(0,int.MaxValue)]
-        public decimal Value { get; set; } = 0;
+        [Required]
+        [InverseProperty("UserAccount")]
+        public AccountModel Account { get; set; }
 
         public UserModel()
         {

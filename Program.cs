@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Mubank.Middlawares;
@@ -10,13 +11,12 @@ using Mubank.Services;
 using Mubank.Services.IServices;
 using System.Text;
 
-
 namespace Mubank
 {
     public class Program
     {
         public static void Main(string[] args)
-        {
+        {                        
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.           
@@ -58,35 +58,50 @@ namespace Mubank
             });
             builder.Services.AddOpenApi();
             builder.Services.AddAuthorization();
-            builder.Services.AddSwaggerGen(c =>
+            builder.Services.AddSwaggerGen(options =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Minha API", Version = "v1" });
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "MuBank API",
+                    Version = "v1",
+                    Description = "API bancária para gerenciamento de contas, usuários e transações.",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Henrique Maurel",
+                        Email = "henriquemaurel37@gmail.com"
+                    }
+                });
 
-                // Configuração do JWT no Swagger
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                // Autenticação JWT no Swagger
+                var securityScheme = new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
                     Type = SecuritySchemeType.Http,
-                    Scheme = "Bearer",
+                    Scheme = "bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "Insira o token JWT como: Bearer {seu_token}"
-                });
+                    Description = "Insira o token JWT no formato: Bearer {seu_token_aqui}"
+                };
 
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
+                options.AddSecurityDefinition("Bearer", securityScheme);
+
+                var securityRequirement = new OpenApiSecurityRequirement
                 {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Id = "Bearer",
+                                Type = ReferenceType.SecurityScheme
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                };
+
+                options.AddSecurityRequirement(securityRequirement);
+
             });
 
             builder.Services.AddScoped<ITokenService, TokenService>();
@@ -101,11 +116,11 @@ namespace Mubank
             }
 
             app.UseHttpsRedirection();
-
-            // app.UseRegisterConnectionMiddleware();
-            // app.UseSearchBlockIPsMiddleware();
-            // app.UseRateLimitMiddleware();
-            // app.UseErrorMiddleware();
+            
+            app.UseRegisterConnectionMiddleware();
+            app.UseSearchBlockIPsMiddleware();
+            app.UseRateLimitMiddleware();
+            app.UseErrorMiddleware();
 
             app.UseAuthentication();
 

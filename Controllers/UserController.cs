@@ -49,8 +49,13 @@ namespace Mubank.Controllers
 
             return dto;
         }
-        
 
+        /// <summary>
+        /// Retorna todos os usuários cadastrados.
+        /// </summary>
+        /// <returns>Lista de usuários</returns>
+        /// <response code="200">Usuários retornados com sucesso</response>
+        /// <response code="500">Erro interno</response>
         [HttpGet]
         public async Task<IActionResult> GetUserAsync(Guid? id)
         {            
